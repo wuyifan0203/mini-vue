@@ -1,4 +1,5 @@
 import { track, trigger } from "./effect";
+import { ReactiveFlags } from "./reactive";
 
 const get = createGetter();
 const set = createSetter();
@@ -7,6 +8,12 @@ const readonlyGet = createGetter(true);
  //只要对象 . 会调用get方法
 function createGetter(isReadonly = false) {
     return function get(target, key) {
+        if(key === ReactiveFlags.IS_REACTIVE){
+            return !isReadonly
+        }else if(key === ReactiveFlags.IS_READONLY){
+            return isReadonly
+        }
+
         // res 为对象的实际指 -> target[key]
         const res = Reflect.get(target, key);
         if (!isReadonly) {

@@ -1,9 +1,12 @@
 import { extend } from "../shared";
 
+let activeEffect;
+// 判断是否因该收集依赖 ，用于在stop() 后调用get，会继续收集依赖的问题
+let shouldTrack;
 class ReactiveEffect {
     // 存放放dep
     deps = [];
-    // 标志位是否执行过stop
+    // 标志位是否执行过stop，true：未执行过stop
     active = true;
     // 内部的fn
     private _fn: any
@@ -15,8 +18,17 @@ class ReactiveEffect {
     }
 
     run() {
-        activeEffect = this
-        return this._fn();
+        if (!this.active) {
+            return this._fn();
+        }
+        shouldTrack = true;
+        activeEffect = this;
+
+        const result = this._fn();
+
+        shouldTrack = false;
+
+        return result;
     }
 
     stop() {
@@ -25,6 +37,7 @@ class ReactiveEffect {
             this.deps.forEach((dep: any) => {
                 dep.delete(this)
             });
+            this.deps.length = 0;
             if (this.onStop) {
                 this.onStop();
             }
@@ -45,6 +58,11 @@ export function track(target: any, key: any) {
      * dep 是集合 里面是存放的effect
      * 
      **/
+
+    // 当收集时，没有effect的时候，需要返回
+    if (!activeEffect) return;
+    // 当执行过stop 后，再次调用get时依赖不应该被收集
+    if (!shouldTrack) return;
     let depMap = targetMap.get(target);
     if (!depMap) {
         depMap = new Map();
@@ -57,8 +75,8 @@ export function track(target: any, key: any) {
         depMap.set(key, dep)
     }
 
-    // 当收集时，没有effect的时候，需要返回
-    if(!activeEffect) return
+    // 如果收集过就停止收集
+    if(dep.has(activeEffect)) return;
     // 现在执行的effect 为当前的activeEffect(当前依赖项)
     dep.add(activeEffect);
     // 反向收集dep，使effect 有dep
@@ -80,7 +98,7 @@ export function trigger(target, key) {
     }
 
 }
-let activeEffect;
+
 export function effect(fn, options: any = {}) {
     const _effect = new ReactiveEffect(fn, options.scheduler);
     extend(_effect, options);

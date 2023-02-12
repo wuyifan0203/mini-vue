@@ -1,21 +1,28 @@
+import { isObject } from "../shared";
 import { track, trigger } from "./effect";
-import { ReactiveFlags } from "./reactive";
+import { reactive, ReactiveFlags, readonly } from "./reactive";
 
 const get = createGetter();
 const set = createSetter();
 const readonlyGet = createGetter(true);
 
- //只要对象 . 会调用get方法
+//只要对象 . 会调用get方法
 function createGetter(isReadonly = false) {
     return function get(target, key) {
-        if(key === ReactiveFlags.IS_REACTIVE){
+        if (key === ReactiveFlags.IS_REACTIVE) {
             return !isReadonly
-        }else if(key === ReactiveFlags.IS_READONLY){
+        } else if (key === ReactiveFlags.IS_READONLY) {
             return isReadonly
         }
 
         // res 为对象的实际指 -> target[key]
         const res = Reflect.get(target, key);
+
+        // res类型为object则转化为reactive
+        if (isObject(res)) {
+            return isReadonly ? readonly(res) : reactive(res);
+        }
+
         if (!isReadonly) {
             // 依赖收集
             track(target, key)
@@ -42,9 +49,9 @@ export const mutableHandlers = {
 }
 
 export const readonlyHandlers = {
-    get:readonlyGet,
+    get: readonlyGet,
     set(target, key, value) {
-        console.warn(`key ${key} cant't be set , because target is readonly object.`,target);
+        console.warn(`key ${key} cant't be set , because target is readonly object.`, target);
         return true;
     }
 

@@ -19,6 +19,9 @@ describe('readonly', () => {
         expect(isReadonly(wrapped)).toBe(true);
         expect(isReadonly(user)).toBe(false);
 
+        expect(isReadonly(wrapped.work)).toBe(true);
+        expect(isReadonly(user.work)).toBe(false);
+
     });
 
     it('warn when call set', () => {

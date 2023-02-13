@@ -81,8 +81,6 @@ describe('effect', () => {
         // obj.foo=3;
         // 先 get 后 set
         obj.foo++;
-
-        console.log(dummy);
         
         // stop 后，不会调用 efffect 的fn
         expect(dummy).toBe(2);

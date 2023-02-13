@@ -58,11 +58,10 @@ export function track(target: any, key: any) {
      * dep 是集合 里面是存放的effect
      * 
      **/
+    if(!isTracking()){
+        return
+    }
 
-    // 当收集时，没有effect的时候，需要返回
-    if (!activeEffect) return;
-    // 当执行过stop 后，再次调用get时依赖不应该被收集
-    if (!shouldTrack) return;
     let depMap = targetMap.get(target);
     if (!depMap) {
         depMap = new Map();
@@ -74,19 +73,37 @@ export function track(target: any, key: any) {
         dep = new Set();
         depMap.set(key, dep)
     }
+    trackEffect(dep)
+}
 
-    // 如果收集过就停止收集
-    if(dep.has(activeEffect)) return;
-    // 现在执行的effect 为当前的activeEffect(当前依赖项)
-    dep.add(activeEffect);
-    // 反向收集dep，使effect 有dep
-    activeEffect.deps.push(dep);
+export function trackEffect(dep) {
+        // 如果收集过就停止收集
+        if(dep.has(activeEffect)) return;
+        // 现在执行的effect 为当前的activeEffect(当前依赖项)
+        dep.add(activeEffect);
+        // 反向收集dep，使effect 有dep
+        activeEffect.deps.push(dep);
+}
+
+export function isTracking() {
+
+        // 当收集时，没有effect的时候，需要返回
+        // if (!activeEffect) return;
+        // 当执行过stop 后，再次调用get时依赖不应该被收集
+        // if (!shouldTrack) return;
+
+        // 等同于
+    return shouldTrack && activeEffect !== undefined;
 }
 
 export function trigger(target, key) {
     let depMap = targetMap.get(target);
     let dep = depMap.get(key);
 
+    triggerEffect(dep);
+}
+
+export function triggerEffect(dep){
     for (const effect of dep) {
         if (effect.scheduler) {
             effect.scheduler();
@@ -94,9 +111,7 @@ export function trigger(target, key) {
         } else {
             effect.run()
         }
-
     }
-
 }
 
 export function effect(fn, options: any = {}) {

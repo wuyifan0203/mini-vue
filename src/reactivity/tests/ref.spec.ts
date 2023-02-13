@@ -1,5 +1,5 @@
 import { effect } from "../effect";
-import { ref } from "../ref";
+import { isRef, ref, unRef } from "../ref";
 
 describe('ref', () => {
     it('happy path', () => {
@@ -43,5 +43,19 @@ describe('ref', () => {
         expect(dummy).toBe(1);
         a.value.count++;
         expect(dummy).toBe(2);
+    });
+
+    it('isRef ', () => {
+        // 判断是否为ref对象
+        const a = ref(1);
+        expect(isRef(a)).toBe(true);
+        expect(isRef(1)).toBe(false);
+    });
+
+    it('unRef', () => {
+        // 返回ref的value
+        const a = ref(1);
+        expect(unRef(a)).toBe(1);
+        expect(unRef(1)).toBe(1);
     });
 });

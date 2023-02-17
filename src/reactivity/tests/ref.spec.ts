@@ -1,5 +1,5 @@
 import { effect } from "../effect";
-import { isRef, ref, unRef } from "../ref";
+import { isRef, ref, unRef,proxyRef } from "../ref";
 
 describe('ref', () => {
     it('happy path', () => {
@@ -57,5 +57,28 @@ describe('ref', () => {
         const a = ref(1);
         expect(unRef(a)).toBe(1);
         expect(unRef(1)).toBe(1);
+    });
+
+
+    // 用于template中
+    it('proxyRef', () => {
+
+        const user = {
+            age:ref(10),
+            name:"Lin"
+        }
+
+        const proxyUser = proxyRef(user);
+        expect(user.age.value).toBe(10);
+        expect(proxyUser.age).toBe(10);
+        expect(proxyUser.name).toBe('Lin');
+
+        proxyUser.age++;
+        expect(user.age.value).toBe(11);
+        expect(proxyUser.age).toBe(11);
+
+        proxyUser.age = ref(15);
+        expect(user.age.value).toBe(15);
+        expect(proxyUser.age).toBe(15);
     });
 });

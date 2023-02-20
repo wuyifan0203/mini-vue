@@ -3,7 +3,7 @@ import { extend } from "../shared";
 let activeEffect;
 // 判断是否因该收集依赖 ，用于在stop() 后调用get，会继续收集依赖的问题
 let shouldTrack;
-class ReactiveEffect {
+export class ReactiveEffect {
     // 存放放dep
     deps = [];
     // 标志位是否执行过stop，true：未执行过stop

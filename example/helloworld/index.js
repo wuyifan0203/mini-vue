@@ -1,14 +1,17 @@
 
+import { createApp, h } from '../../lib/my-vue.esm.js'
 const App = {
-    render(){
-        return h('div','Hellow ' + this.message);
+    render() {
+        return h('div', 'Hellow ' + this.message);
     },
 
-    setup(){
+    setup() {
         return {
-            message:'world'
+            message: 'world'
         }
     }
 };
+
+const appDom = document.querySelector('#app')
 const app = createApp(App);
-app.mount("#app");
+app.mount(appDom);

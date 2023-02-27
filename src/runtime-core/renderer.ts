@@ -8,6 +8,8 @@ export function render(vnode,container) {
 }
 
 export function patch(vnode,container) {
+    // 如果类型为 HTMLElement则处理element
+    // 如果为组件则处理组件
     // 处理组件 
     processComponent(vnode,container)
     

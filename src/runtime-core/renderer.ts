@@ -1,3 +1,4 @@
+import { isObject } from "../shared/index";
 import { createComponentInstance, setupComponent } from "./conponent"
 
 export function render(vnode,container) {
@@ -11,9 +12,38 @@ export function patch(vnode,container) {
     // 如果类型为 HTMLElement则处理element
     // 如果为组件则处理组件
     // 处理组件 
-    processComponent(vnode,container)
+    console.log(vnode.type);
+    if (typeof vnode.type === 'string') {
+        processElement(vnode,container)
+    }else if(isObject(vnode.type)){
+        processComponent(vnode,container)
+    }
+
     
 }
+
+function processElement(vnode,container) {
+    mountElement(vnode,container)
+}
+
+function mountElement(vnode: any, container: any) {
+    const {type,children,props} = vnode
+    const el = document.createElement(type);
+
+    if(typeof children === 'string'){
+        el.textContent = children;
+    }else if(Array.isArray(children)){
+        children.forEach(v=>patch(v,el))
+    }
+
+
+    for (const key in props) {
+        el.setAttribute(key,props[key])  
+    }
+
+    container.append(el)
+}
+
 
 
 function processComponent(vnode,container) {
@@ -43,4 +73,7 @@ function setupRenderEffect(instance,container) {
     // vnode -> element -> mouuntElement
     patch(subTree,container);
 }
+
+
+
 

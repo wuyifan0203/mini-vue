@@ -1,7 +1,9 @@
 
-import { createApp, h } from '../../lib/my-vue.esm.js'
+import { createApp, h } from '../../lib/my-vue.esm.js';
+window.self = null;
 const App = {
     render() {
+        window.self = this;
         return h(
             'div', // type
             {
@@ -9,8 +11,8 @@ const App = {
                 class:['red','big']
             }, // props
             // children 可以为string 也可以为Array
-            // 'Hellow ' + this.message // string
-            [h('p',{class:'blue'},'I am'),h('span',{class:'gray'},' yifanwu')]
+            'Hellow ' + this.message // string
+            // [h('p',{class:'blue'},'I am'),h('span',{class:'gray'},' yifanwu')]
         );
     },
 

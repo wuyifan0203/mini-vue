@@ -12,7 +12,6 @@ export function patch(vnode,container) {
     // 如果类型为 HTMLElement则处理element
     // 如果为组件则处理组件
     // 处理组件 
-    console.log(vnode.type);
     if (typeof vnode.type === 'string') {
         processElement(vnode,container)
     }else if(isObject(vnode.type)){
@@ -28,7 +27,7 @@ function processElement(vnode,container) {
 
 function mountElement(vnode: any, container: any) {
     const {type,children,props} = vnode
-    const el = document.createElement(type);
+    const el = vnode.el = document.createElement(type);
 
     if(typeof children === 'string'){
         el.textContent = children;
@@ -51,27 +50,31 @@ function processComponent(vnode,container) {
     mountCompnent(vnode,container)
 }
 
-function mountCompnent(vnode,container) {
+function mountCompnent(initialVnode,container) {
     // 创建组件实例
-    const instance = createComponentInstance(vnode);
+    const instance = createComponentInstance(initialVnode);
 
 
     // 配置组件 获取到render函数和setup函数的运行结果，挂载到实例上
     setupComponent(instance);
 
     // 处理渲染逻辑
-    setupRenderEffect(instance,container)
+    setupRenderEffect(instance,initialVnode,container)
 
 }
 
 
-function setupRenderEffect(instance,container) {
+function setupRenderEffect(instance,initialVnode,container) {
+    const {proxy} = instance
     // 生成虚拟节点树
-    const subTree = instance.render(); 
-    // 现在已经将组件转化为vnode
+    // 绑定 this
+    const subTree = instance.render.call(proxy); 
+    // 现在已经将组件转化为vnode,subTree为vnode 
     // 变成vnode后由patch进行处理
     // vnode -> element -> mouuntElement
     patch(subTree,container);
+
+    initialVnode.el = subTree.el;    
 }
 
 

@@ -1,3 +1,4 @@
+import { isObject } from "../shared/index";
 import { mutableHandlers, readonlyHandlers, shallowReadonlyHandlers } from "./baseHandlers";
 
 export const enum ReactiveFlags {
@@ -18,6 +19,10 @@ export function readonly(raw) {
 }
 
 export function shallowReadonly(raw) {
+    if(!isObject(raw)){
+        console.warn(`target ${raw} is not Object`);
+        return raw;
+    }
     return createReactiveObject(raw,shallowReadonlyHandlers)
 }
 

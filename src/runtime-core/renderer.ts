@@ -43,7 +43,12 @@ function mountElement(vnode: any, container: any) {
             const event = key.slice(2).toLowerCase();
             el.addEventListener(event,props[key]);
         }else{
-            el.setAttribute(key, props[key])
+            if(key === 'class'){
+                const val = props[key].join(' ')
+                el.setAttribute(key, val);
+            }else{
+                el.setAttribute(key, props[key])
+            }
         }
     }
 

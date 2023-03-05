@@ -1,43 +1,45 @@
 import { isObject } from "../shared/index";
+import { ShapeFlag } from "../shared/ShapeFlag";
 import { createComponentInstance, setupComponent } from "./conponent"
 
-export function render(vnode,container) {
+export function render(vnode, container) {
     //调用patch
 
-    patch(vnode,container)
-    
+    patch(vnode, container)
+
 }
 
-export function patch(vnode,container) {
+export function patch(vnode, container) {
     // 如果类型为 HTMLElement则处理element
     // 如果为组件则处理组件
     // 处理组件 
-    if (typeof vnode.type === 'string') {
-        processElement(vnode,container)
-    }else if(isObject(vnode.type)){
-        processComponent(vnode,container)
+    const { shapeFlag } = vnode;
+    if (shapeFlag & ShapeFlag.ELEMENT) {
+        processElement(vnode, container)
+    } else if (shapeFlag & ShapeFlag.STATEFUL_COMPONENT) {
+        processComponent(vnode, container)
     }
 
-    
+
 }
 
-function processElement(vnode,container) {
-    mountElement(vnode,container)
+function processElement(vnode, container) {
+    mountElement(vnode, container)
 }
 
 function mountElement(vnode: any, container: any) {
-    const {type,children,props} = vnode
+    const { type, children, props ,shapeFlag} = vnode
     const el = vnode.el = document.createElement(type);
 
-    if(typeof children === 'string'){
+    if (shapeFlag & ShapeFlag.TEXT_CHILDREN) {
         el.textContent = children;
-    }else if(Array.isArray(children)){
-        children.forEach(v=>patch(v,el))
+    } else if (shapeFlag & ShapeFlag.ARRAY_CHILDREN) {
+        children.forEach(v => patch(v, el))
     }
 
 
     for (const key in props) {
-        el.setAttribute(key,props[key])  
+        el.setAttribute(key, props[key])
     }
 
     container.append(el)
@@ -45,12 +47,12 @@ function mountElement(vnode: any, container: any) {
 
 
 
-function processComponent(vnode,container) {
+function processComponent(vnode, container) {
     // 挂载组件
-    mountCompnent(vnode,container)
+    mountCompnent(vnode, container)
 }
 
-function mountCompnent(initialVnode,container) {
+function mountCompnent(initialVnode, container) {
     // 创建组件实例
     const instance = createComponentInstance(initialVnode);
 
@@ -59,22 +61,22 @@ function mountCompnent(initialVnode,container) {
     setupComponent(instance);
 
     // 处理渲染逻辑
-    setupRenderEffect(instance,initialVnode,container)
+    setupRenderEffect(instance, initialVnode, container)
 
 }
 
 
-function setupRenderEffect(instance,initialVnode,container) {
-    const {proxy} = instance
+function setupRenderEffect(instance, initialVnode, container) {
+    const { proxy } = instance
     // 生成虚拟节点树
     // 绑定 this
-    const subTree = instance.render.call(proxy); 
+    const subTree = instance.render.call(proxy);
     // 现在已经将组件转化为vnode,subTree为vnode 
     // 变成vnode后由patch进行处理
     // vnode -> element -> mouuntElement
-    patch(subTree,container);
+    patch(subTree, container);
 
-    initialVnode.el = subTree.el;    
+    initialVnode.el = subTree.el;
 }
 
 

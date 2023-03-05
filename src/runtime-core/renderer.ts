@@ -1,4 +1,4 @@
-import { isObject } from "../shared/index";
+import { isObject, isOn } from "../shared/index";
 import { ShapeFlag } from "../shared/ShapeFlag";
 import { createComponentInstance, setupComponent } from "./conponent"
 
@@ -29,7 +29,7 @@ function processElement(vnode, container) {
 
 function mountElement(vnode: any, container: any) {
     const { type, children, props ,shapeFlag} = vnode
-    const el = vnode.el = document.createElement(type);
+    const el:HTMLElement = vnode.el = document.createElement(type);
 
     if (shapeFlag & ShapeFlag.TEXT_CHILDREN) {
         el.textContent = children;
@@ -39,7 +39,12 @@ function mountElement(vnode: any, container: any) {
 
 
     for (const key in props) {
-        el.setAttribute(key, props[key])
+        if(isOn(key)){
+            const event = key.slice(2).toLowerCase();
+            el.addEventListener(event,props[key]);
+        }else{
+            el.setAttribute(key, props[key])
+        }
     }
 
     container.append(el)

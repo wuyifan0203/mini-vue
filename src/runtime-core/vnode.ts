@@ -1,4 +1,5 @@
 import { ShapeFlag } from "../shared/ShapeFlag"
+import { isObject } from "../shared/index";
 
 export function createVNode(type,props?,children?) {
 
@@ -14,7 +15,13 @@ export function createVNode(type,props?,children?) {
         vnode.shapeFlag = vnode.shapeFlag | ShapeFlag.TEXT_CHILDREN;
     }else if (Array.isArray(children)){
         vnode.shapeFlag = vnode.shapeFlag | ShapeFlag.ARRAY_CHILDREN;
+    }
 
+    // 处理slot
+    if(vnode.shapeFlag & ShapeFlag.STATEFUL_COMPONENT){
+        if(isObject(children)){
+            vnode.shapeFlag = vnode.shapeFlag | ShapeFlag.SLOT_CHILDREN
+        }
     }
 
     return vnode

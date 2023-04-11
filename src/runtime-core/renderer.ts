@@ -1,6 +1,6 @@
 import { isObject, isOn } from "../shared/index";
 import { ShapeFlag } from "../shared/ShapeFlag";
-import { createComponentInstance, setupComponent } from "./conponent"
+import { createComponentInstance, setupComponent } from "./component"
 
 export function render(vnode, container) {
     //调用patch

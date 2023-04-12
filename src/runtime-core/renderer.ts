@@ -1,6 +1,7 @@
 import { isObject, isOn } from "../shared/index";
 import { ShapeFlag } from "../shared/ShapeFlag";
 import { createComponentInstance, setupComponent } from "./component"
+import { Fragment,Text } from "./vnode";
 
 export function render(vnode, container) {
     //调用patch
@@ -13,14 +14,35 @@ export function patch(vnode, container) {
     // 如果类型为 HTMLElement则处理element
     // 如果为组件则处理组件
     // 处理组件 
-    const { shapeFlag } = vnode;
-    if (shapeFlag & ShapeFlag.ELEMENT) {
-        processElement(vnode, container)
-    } else if (shapeFlag & ShapeFlag.STATEFUL_COMPONENT) {
-        processComponent(vnode, container)
+    const { shapeFlag, type } = vnode;
+
+    switch (type) {
+        case Fragment:
+            processFragment(vnode, container)
+            break;
+        case Text:
+            processText(vnode, container)
+            break;
+
+        default:
+            if (shapeFlag & ShapeFlag.ELEMENT) {
+                processElement(vnode, container)
+            } else if (shapeFlag & ShapeFlag.STATEFUL_COMPONENT) {
+                processComponent(vnode, container)
+            }
+            break;
     }
 
+}
 
+function processFragment(vnode: any, container: any) {
+    vnode.children.forEach(v => patch(v, container))
+}
+
+function processText(vnode: any, container: any)  {
+    const textNode = vnode.el = document.createTextNode(vnode.children);
+    container.append(textNode);
+    
 }
 
 function processElement(vnode, container) {
@@ -28,8 +50,8 @@ function processElement(vnode, container) {
 }
 
 function mountElement(vnode: any, container: any) {
-    const { type, children, props ,shapeFlag} = vnode
-    const el:HTMLElement = vnode.el = document.createElement(type);
+    const { type, children, props, shapeFlag } = vnode
+    const el: HTMLElement = vnode.el = document.createElement(type);
 
     if (shapeFlag & ShapeFlag.TEXT_CHILDREN) {
         el.textContent = children;
@@ -39,14 +61,14 @@ function mountElement(vnode: any, container: any) {
 
 
     for (const key in props) {
-        if(isOn(key)){
+        if (isOn(key)) {
             const event = key.slice(2).toLowerCase();
-            el.addEventListener(event,props[key]);
-        }else{
-            if(key === 'class'){
+            el.addEventListener(event, props[key]);
+        } else {
+            if (key === 'class') {
                 const val = props[key].join(' ')
                 el.setAttribute(key, val);
-            }else{
+            } else {
                 el.setAttribute(key, props[key])
             }
         }
@@ -88,6 +110,8 @@ function setupRenderEffect(instance, initialVnode, container) {
 
     initialVnode.el = subTree.el;
 }
+
+
 
 
 

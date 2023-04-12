@@ -1,12 +1,12 @@
 
-import { createApp, h,renderSlots } from '../../lib/my-vue.esm.js';
+import { createApp, h, renderSlots, createTextVNode } from '../../lib/my-vue.esm.js';
 
 const Foo = {
     render() {
-        const foo = h('div',{},'foo')
+        const foo = h('div', {}, 'foo')
         console.log(this.$slots);
         const age = 24;
-        return h('div', {},[renderSlots(this.$slots,'header',{age}),foo,renderSlots(this.$slots,'footer')])
+        return h('div', {}, [renderSlots(this.$slots, 'header', { age }), foo, renderSlots(this.$slots, 'footer')])
     },
 
     setup() {
@@ -15,15 +15,14 @@ const Foo = {
 }
 const App = {
     render() {
-
-        const app = h('div',{},'App');
+        const app = h('div', {}, 'App');
         // 支持两种slots格式，第一种是一个vnode，第二种是一个对象
         // const foo2 = h(Foo,{},h('p',{},'vnode type'));
-        const foo1 = h(Foo,{},{
-            header:({age})=>h('p',{},'header'+ age),
-            footer:()=>h('span',{},'footer')
+        const foo1 = h(Foo, {}, {
+            header: ({ age }) => h('p', {}, 'header' + age),
+            footer: () => [h('span', {}, 'footer'), createTextVNode('这是文字结点')]
         })
-        return h('div',{},[app,foo1])
+        return h('div', {}, [app, foo1])
     },
 
     setup() {

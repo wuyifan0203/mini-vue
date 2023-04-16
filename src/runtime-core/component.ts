@@ -4,18 +4,20 @@ import { PublicInstanceProxyHandles } from "./componentPublicInstance";
 import { initSlots } from "./compontSlots";
 import { emit } from "./compontentEmit";
 
-export function createComponentInstance(vnode) {
+export function createComponentInstance(vnode, parent) {
     //创建对象实例
     const component = {
         vnode,
         type: vnode.type,
         setupState: {},
         props: {},
-        slots:{},
-        emit:()=>{}
+        slots: {},
+        provides: parent?.provides ? parent.provides : {},
+        parent,
+        emit: () => { }
     }
 
-    component.emit = emit.bind(null,component) as any;
+    component.emit = emit.bind(null, component) as any;
 
     return component
 
@@ -44,8 +46,8 @@ function setupStatefulComponent(instance: any) {
     // 可能没有setup
     if (setup) {
         currentInstance = instance
-        const setupResult = setup(shallowReadonly(instance.props),{
-            emit:instance.emit
+        const setupResult = setup(shallowReadonly(instance.props), {
+            emit: instance.emit
         });
         currentInstance = null;
         // 处理 setup 返回结果

@@ -1,3 +1,12 @@
+/*
+ * @Author: wuyifan 1208097313@qq.com
+ * @Date: 2023-02-24 00:10:49
+ * @LastEditors: wuyifan 1208097313@qq.com
+ * @LastEditTime: 2023-04-20 01:11:40
+ * @FilePath: /my-vue/src/runtime-core/component.ts
+ * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
+ */
+import { proxyRef } from "../reactivity";
 import { shallowReadonly } from "../reactivity/reactive";
 import { initProps } from "./componentProps";
 import { PublicInstanceProxyHandles } from "./componentPublicInstance";
@@ -14,6 +23,8 @@ export function createComponentInstance(vnode, parent) {
         slots: {},
         provides: parent?.provides ? parent.provides : {},
         parent,
+        isMounted:false,
+        subTree:{},
         emit: () => { }
     }
 
@@ -58,7 +69,7 @@ function handleSetupResult(instance, setupResult: any) {
     // result 可以是函数，也可以是对象
 
     if (typeof setupResult === 'object') {
-        instance.setupState = setupResult;
+        instance.setupState = proxyRef(setupResult);
     } else if (typeof setupResult === 'function') {
 
     }

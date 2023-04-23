@@ -13,3 +13,5 @@ export const capitalize = (key:string):string => key.charAt(0).toUpperCase() + k
 export const toHadelKey = (key:string):string => key ? 'on' + capitalize(key) : '';
 
 export const camelize = (key:string):string => key.replace(/-(\w)/g,(_,c:string)=>c ? c.toUpperCase():'')
+
+export const EMPTY_OBJ = {}

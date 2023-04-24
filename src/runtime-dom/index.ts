@@ -2,7 +2,7 @@
  * @Author: wuyifan 1208097313@qq.com
  * @Date: 2023-04-17 23:44:17
  * @LastEditors: wuyifan 1208097313@qq.com
- * @LastEditTime: 2023-04-24 00:05:31
+ * @LastEditTime: 2023-04-25 00:13:01
  * @FilePath: /my-vue/src/runtime-dom/index.ts
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -13,7 +13,7 @@ function createElement(type) {
     return document.createElement(type)
 }
 
-function hostPatchProp(el, key, prevVal, nextVal) {
+function patchProp(el, key, prevVal, nextVal) {
     if (isOn(key)) {
         const event = key.slice(2).toLowerCase();
         el.addEventListener(event, nextVal);
@@ -31,15 +31,27 @@ function hostPatchProp(el, key, prevVal, nextVal) {
     }
 }
 
-function hostInsert(parent, el) {
+function insert(parent, el) {
     parent.append(el)
 }
 
+function remove(child) {
+    const parent = child.parentNode;
+    if(parent){
+        parent.removeChild(child);
+    }
+}
+
+function setElementText(el,text) {
+    el.textContent = text;
+}
 
 const renderer: any = createRenderer({
     createElement,
-    hostPatchProp,
-    hostInsert
+    patchProp,
+    insert,
+    remove,
+    setElementText
 })
 
 export function createApp(...arg) {

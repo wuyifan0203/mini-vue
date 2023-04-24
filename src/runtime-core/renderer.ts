@@ -6,7 +6,13 @@ import { createAppAPI } from "./createApp";
 import { Fragment, Text } from "./vnode";
 
 export function createRenderer(options) {
-    const { createElement, hostInsert, hostPatchProp } = options
+    const {
+        createElement: hostCreateElement,
+        insert: hostInsert,
+        patchProp: hostPatchProp,
+        remove: hostRemove,
+        setElementText: hostSetElementText
+    } = options
 
     function render(vnode, container) {
         //调用patch
@@ -49,21 +55,69 @@ export function createRenderer(options) {
 
     function processElement(n1, n2, container, parentComponent) {
         if (!n1) {
+            // n1 为空是第一次初始化
             mountElement(n2, container, parentComponent);
         } else {
-            patchElement(n1, n2, container)
+            patchElement(n1, n2, container,parentComponent)
         }
     }
 
-    function patchElement(n1, n2, container) {
+    function patchElement(n1, n2, container,parentComponent) {
         console.log('patchElement');
-        console.log('current', n1);
-        console.log('prev', n2);
+        console.log('new', n1);
+        console.log('old', n2);
 
         const oldProps = n2.props || EMPTY_OBJ;
         const newProps = n1.props || EMPTY_OBJ;
         const el = n1.el = n2.el;
+        patchChildren(n1, n2, el,parentComponent)
         patchProps(el, oldProps, newProps)
+    }
+
+    function patchChildren(n1, n2, container,parentComponent) {
+        const oldShapeFlag = n2.shapeFlag;
+        const newShapeFlag = n1.shapeFlag;
+        const oldChildren = n2.children;
+        const newChildren = n1.children;
+
+
+        if (newShapeFlag & ShapeFlag.TEXT_CHILDREN) {
+            // 老的是数组，新的是text
+            if (oldShapeFlag & ShapeFlag.ARRAY_CHILDREN) {
+                // 1.清除老的
+                unmountChildren(oldChildren)
+                // 2.设置新的
+                hostSetElementText(container, newChildren)
+            } else {
+                // 老的是Text 新的也是Text
+                if (oldChildren !== newChildren) {
+                    hostSetElementText(container, newChildren)
+                }
+            }
+        } else {
+            // 老的是Text 新的是数组
+            if (oldShapeFlag & ShapeFlag.TEXT_CHILDREN) {
+                // 1.清除老的Text
+                hostSetElementText(container, '')
+                // 2.设置新的
+                mountChildren(newChildren,container,parentComponent)
+            }
+        }
+
+    }
+
+    function mountChildren(children,container,parentComponent) {
+        children.forEach(v => patch(null, v, container, parentComponent))
+    }
+
+    function unmountChildren(children) {
+        for (let index = 0; index < children.length; index++) {
+            const element = children[index].el;
+            // 删除
+            hostRemove(element);
+
+        }
+
     }
 
     function patchProps(el, oldProps, newProps) {
@@ -87,7 +141,7 @@ export function createRenderer(options) {
 
     function mountElement(vnode: any, container: any, parentComponent) {
         const { type, children, props, shapeFlag } = vnode
-        const el: HTMLElement = vnode.el = createElement(type);
+        const el: HTMLElement = vnode.el = hostCreateElement(type);
 
         if (shapeFlag & ShapeFlag.TEXT_CHILDREN) {
             el.textContent = children;

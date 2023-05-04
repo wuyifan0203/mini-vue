@@ -1,3 +1,11 @@
+/*
+ * @Author: wuyifan 1208097313@qq.com
+ * @Date: 2023-02-23 23:57:40
+ * @LastEditors: wuyifan 1208097313@qq.com
+ * @LastEditTime: 2023-05-03 01:15:43
+ * @FilePath: /my-vue/src/runtime-core/vnode.ts
+ * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
+ */
 import { ShapeFlag } from "../shared/ShapeFlag"
 import { isObject } from "../shared/index";
 
@@ -10,6 +18,7 @@ export function createVNode(type,props?,children?) {
         type,// app 的setup
         props,
         children,
+        key: props && props.key,
         shapeFlag:getShapeFlag(type),
         el:null //根组件节点
     }

@@ -2,7 +2,7 @@
  * @Author: wuyifan 1208097313@qq.com
  * @Date: 2023-04-24 23:31:29
  * @LastEditors: wuyifan 1208097313@qq.com
- * @LastEditTime: 2023-05-05 01:24:41
+ * @LastEditTime: 2023-05-05 23:47:31
  * @FilePath: /my-vue/example/patchChildren/index.js
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -167,6 +167,51 @@ const ArrayToArray = {
             h('p', { key: 'C' }, 'C'),
         ];
 
+        //中间部分对比
+        // 老的里面存在，新的里面不存在，删除老的
+        // A,B,(C,D),F,G
+        // A,B,(E,C),F,G
+
+        // const midDelOlderPrev = [
+        //     h('p', { key: 'A' }, 'A'),
+        //     h('p', { key: 'B' }, 'B'),
+        //     h('p', { key: 'C' ,id:'C-prev'}, 'C'),
+        //     h('p', { key: 'D' }, 'D'),
+        //     h('p', { key: 'F' }, 'F'),
+        //     h('p', { key: 'G' }, 'G'),
+        // ]
+
+        // const midDelOlderNext = [
+        //     h('p', { key: 'A' }, 'A'),
+        //     h('p', { key: 'B' }, 'B'),
+        //     h('p', { key: 'E' }, 'E'),
+        //     h('p', { key: 'C',id:'C-Next' }, 'C'),
+        //     h('p', { key: 'F' }, 'F'),
+        //     h('p', { key: 'G' }, 'G'),
+        // ]
+
+        // 优化点
+        // 当老的数量多于以patch的新节点数量，其余的可以直接删除
+        const midDelOlderPrev = [
+            h('p', { key: 'A' }, 'A'),
+            h('p', { key: 'B' }, 'B'),
+            h('p', { key: 'C' ,id:'C-prev'}, 'C'),
+            h('p', { key: 'D' }, 'D'),
+            h('p', { key: 'H' }, 'H'),
+            h('p', { key: 'I' }, 'I'),
+            h('p', { key: 'F' }, 'F'),
+            h('p', { key: 'G' }, 'G'),
+        ]
+
+        const midDelOlderNext = [
+            h('p', { key: 'A' }, 'A'),
+            h('p', { key: 'B' }, 'B'),
+            h('p', { key: 'E' }, 'E'),
+            h('p', { key: 'C',id:'C-Next' }, 'C'),
+            h('p', { key: 'F' }, 'F'),
+            h('p', { key: 'G' }, 'G'),
+        ]
+
 
         return h('div', { key: 'root' },
             [
@@ -176,12 +221,14 @@ const ArrayToArray = {
                 // h('div', {}, self.isChange ? rightNext : righttPrev),
                 // h('div', {}, '新的比老的长，左侧对比'),
                 // h('div', {}, self.isChange ? leftLongerNext : leftLongerPrev),
-                h('div', {}, '新的比老的长，右侧对比'),
-                h('div', {}, self.isChange ? rightLongerNext : rightLongerPrev),
+                // h('div', {}, '新的比老的长，右侧对比'),
+                // h('div', {}, self.isChange ? rightLongerNext : rightLongerPrev),
                 // h('div', {}, '老的比新的长，左侧对比'),
                 // h('div', {}, self.isChange ? leftOlderLongerNext : leftOlderLongerPrev),
                 // h('div', {}, '老的比新的长，右侧对比'),
                 // h('div', {}, self.isChange ? rightOlderLongerNext : rightOlderLongerPrev),
+                h('div',{},'中间对比，老的有，新的没有，需要删除'),
+                h('div', {}, self.isChange ? midDelOlderNext : midDelOlderPrev),
             ]
         )
     },
